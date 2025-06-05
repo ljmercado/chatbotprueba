@@ -28,34 +28,28 @@
         const chatShadow = chatElement.shadowRoot;
         if (!chatShadow) throw "⏳ Esperando shadowRoot interno...";
 
-        // 🔍 Buscamos un contenedor padre donde se agregan los mensajes individuales
-        const container = chatShadow.querySelector('.chat-wrapper') || chatShadow.querySelector('.scrollable');
-        if (!container) throw "⏳ Esperando contenedor de mensajes...";
+        const messagesContainer = chatShadow.querySelector('.message-list');
+        if (!messagesContainer) throw "⏳ Esperando .message-list...";
 
-        console.log("✅ Contenedor de mensajes encontrado:", container);
+        console.log("✅ Contenedor de mensajes encontrado:", messagesContainer);
 
-        // 🛰️ Observar nuevos mensajes del bot
-        const observer = new MutationObserver((mutations) => {
-          mutations.forEach((mutation) => {
-            mutation.addedNodes.forEach((node) => {
-              if (
-                node.nodeType === 1 &&
-                node.matches('div.message.bot-message') &&
-                node.innerText.startsWith('REDIRECT:')
-              ) {
-                const url = node.innerText.replace('REDIRECT:', '').trim();
-                console.log("➡️ Redirigiendo a:", url);
-                window.location.href = url;
-              }
-            });
+        // 🔁 Revisión periódica de mensajes del bot
+        setInterval(() => {
+          const messages = messagesContainer.querySelectorAll('div.message.bot-message');
+          messages.forEach(msg => {
+            const text = msg.innerText;
+            if (text.startsWith('REDIRECT:') && !msg.dataset.redirected) {
+              msg.dataset.redirected = "true"; // para evitar redirecciones múltiples
+              const url = text.replace('REDIRECT:', '').trim();
+              console.log("➡️ Redirigiendo a:", url);
+              window.location.href = url;
+            }
           });
-        });
-
-        observer.observe(container, { childList: true, subtree: true });
+        }, 1000);
 
       } catch (e) {
         console.log(e);
-        setTimeout(waitForChat, 300); // 🔁 Reintenta hasta que todo esté listo
+        setTimeout(waitForChat, 300); // 🔁 Reintenta hasta que esté disponible
       }
     };
 
