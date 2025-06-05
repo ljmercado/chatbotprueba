@@ -15,14 +15,22 @@
 ></df-messenger>
 
   <script>
-  window.addEventListener('df-messenger-loaded', function () {
+  window.addEventListener('df-messenger-loaded', () => {
     const dfMessenger = document.querySelector('df-messenger');
 
-    const waitForChatReady = () => {
-      const chatWindow = dfMessenger.shadowRoot?.querySelector('df-messenger-chat');
-      const messagesContainer = chatWindow?.shadowRoot?.querySelector('.messages');
- console.log(messagesContainer);
-      if (messagesContainer) {
+    const waitForMessages = () => {
+      try {
+        const chatElement = dfMessenger.shadowRoot.querySelector('df-messenger-chat');
+        if (!chatElement) throw "Esperando df-messenger-chat...";
+
+        const chatShadow = chatElement.shadowRoot;
+        if (!chatShadow) throw "Esperando shadowRoot interno...";
+
+        const messagesContainer = chatShadow.querySelector('.messages');
+        if (!messagesContainer) throw "Esperando div .messages...";
+
+        console.log("✅ .messages encontrado:", messagesContainer);
+
         const observer = new MutationObserver((mutations) => {
           mutations.forEach((mutation) => {
             mutation.addedNodes.forEach((node) => {
@@ -32,6 +40,7 @@
                 node.innerText.startsWith('REDIRECT:')
               ) {
                 const url = node.innerText.replace('REDIRECT:', '').trim();
+                console.log("➡️ Redirigiendo a:", url);
                 window.location.href = url;
               }
             });
@@ -39,13 +48,14 @@
         });
 
         observer.observe(messagesContainer, { childList: true });
-      } else {
-        // Reintenta si aún no está listo
-        setTimeout(waitForChatReady, 100);
+
+      } catch (e) {
+        console.log("⏳", e);
+        setTimeout(waitForMessages, 200); // vuelve a intentar
       }
     };
 
-    waitForChatReady();
+    waitForMessages();
   });
 </script>
 
