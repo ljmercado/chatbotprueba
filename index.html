@@ -17,12 +17,12 @@
   <script>
   window.addEventListener('df-messenger-loaded', function () {
     const dfMessenger = document.querySelector('df-messenger');
-    const chatWindow = dfMessenger.shadowRoot.querySelector('df-messenger-chat');
 
-    const waitForMessagesContainer = () => {
-      const messages = chatWindow.shadowRoot.querySelector('.messages');
-      if (messages) {
-        // Observar cambios
+    const waitForChatReady = () => {
+      const chatWindow = dfMessenger.shadowRoot?.querySelector('df-messenger-chat');
+      const messagesContainer = chatWindow?.shadowRoot?.querySelector('.messages');
+
+      if (messagesContainer) {
         const observer = new MutationObserver((mutations) => {
           mutations.forEach((mutation) => {
             mutation.addedNodes.forEach((node) => {
@@ -38,14 +38,14 @@
           });
         });
 
-        observer.observe(messages, { childList: true });
+        observer.observe(messagesContainer, { childList: true });
       } else {
-        // Si no está listo aún, volver a intentar
-        setTimeout(waitForMessagesContainer, 100);
+        // Reintenta si aún no está listo
+        setTimeout(waitForChatReady, 100);
       }
     };
 
-    waitForMessagesContainer();
+    waitForChatReady();
   });
 </script>
 
