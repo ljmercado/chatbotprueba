@@ -16,50 +16,50 @@
    opened="true"
 ></df-messenger>
 
- <script>
-  window.addEventListener('df-messenger-loaded', () => {
-    console.log("✅ df-messenger cargado");
+<script>
+        const dfMessenger = document.querySelector('df-messenger');
+        const redirectPrefix = "REDIRECT:";
 
-    const dfMessenger = document.querySelector('df-messenger');
+        if (dfMessenger) {
+            // Escuchamos el evento cuando Dialogflow Messenger recibe una respuesta del agente
+            dfMessenger.addEventListener('df-response-received', function (event) {
+                // event.detail.response contiene la respuesta completa de Dialogflow
+                const response = event.detail.response;
+                
+                // En Dialogflow ES, el texto está en queryResult.fulfillmentText
+                // En Dialogflow CX, puede estar en queryResult.responseMessages[].text.text[]
+                let fulfillmentText = '';
 
-    const waitForChat = () => {
-      try {
-        const chatElement = dfMessenger.shadowRoot.querySelector('df-messenger-chat');
-        if (!chatElement) throw "⏳ Esperando df-messenger-chat...";
+                if (response && response.queryResult && response.queryResult.fulfillmentText) {
+                    // Dialogflow ES
+                    fulfillmentText = response.queryResult.fulfillmentText;
+                } else if (response && response.queryResult && response.queryResult.responseMessages) {
+                    // Dialogflow CX - buscar en los mensajes de texto
+                    for (const message of response.queryResult.responseMessages) {
+                        if (message.text && message.text.text && message.text.text.length > 0) {
+                            fulfillmentText = message.text.text[0]; // Tomamos el primer mensaje de texto
+                            break; // Salimos del bucle una vez que encontramos un texto
+                        }
+                    }
+                }
 
-        const chatShadow = chatElement.shadowRoot;
-        if (!chatShadow) throw "⏳ Esperando shadowRoot interno...";
+                // Verificar si el texto comienza con "REDIRECT:"
+                if (fulfillmentText.startsWith(redirectPrefix)) {
+                    const url = fulfillmentText.substring(redirectPrefix.length).trim();
+                    console.log(`Mensaje de redirección detectado: ${url}`);
 
-        const messagesContainer = chatShadow.querySelector('#messageList') ||
-                                  chatShadow.querySelector('.message-list') ||
-                                  chatShadow.querySelector('.scrollable') ||
-                                  chatShadow.querySelector('.chat-wrapper');
-        if (!messagesContainer) throw "⏳ Esperando contenedor de mensajes...";
-
-        console.log("✅ Contenedor de mensajes encontrado:", messagesContainer);
-
-        setInterval(() => {
-          console.log("🔍 Buscando mensajes nuevos...");
-          const allDivs = messagesContainer.querySelectorAll('div');
-          allDivs.forEach(div => {
-            const text = div.innerText;
-            if (text && text.includes("Agent Says:") && text.includes("REDIRECT:") && !div.dataset.redirected) {
-              div.dataset.redirected = "true"; // Evita redireccionar más de una vez
-              const url = text.split("REDIRECT:")[1].trim();
-              console.log("➡️ Redirigiendo a:", url);
-              window.location.href = url;
-            }
-          });
-        }, 1000);
-
-      } catch (e) {
-        console.warn(e);
-        setTimeout(waitForChat, 500);
-      }
-    };
-
-    waitForChat();
-  });
-</script>
+                    // Asegúrate de que la URL sea válida antes de redirigir
+                    try {
+                        const validatedUrl = new URL(url); // Esto valida si es una URL bien formada
+                        console.log(`Redirigiendo a: ${validatedUrl.href}`);
+                        window.location.href = validatedUrl.href; // Realiza la redirección
+                    } catch (e) {
+                        console.error(`URL inválida para redirección: ${url}`, e);
+                        // Opcional: Podrías mostrar un mensaje de error al usuario en el chatbot
+                    }
+                }
+            });
+        }
+    </script>
 </body>
 </html>
