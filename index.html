@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Chatbot con Redirección</title>
+  <script src="https://www.gstatic.com/dialogflow-console/fast/messenger/bootstrap.js"></script>
+</head>
+<body>
+
+  <df-messenger
+    intent="WELCOME"
+    chat-title="Asistente"
+    agent-id="TU_AGENT_ID"
+    language-code="es">
+  </df-messenger>
+
+  <script>
+    // Esperar a que se cargue el widget
+    window.addEventListener('df-messenger-loaded', function () {
+      const dfMessenger = document.querySelector('df-messenger');
+      const chatWindow = dfMessenger.shadowRoot
+        .querySelector('df-messenger-chat');
+
+      // Interceptar los mensajes del bot
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          mutation.addedNodes.forEach((node) => {
+            if (node.nodeType === 1 && node.classList.contains('message')) {
+              const text = node.innerText;
+              if (text.startsWith('REDIRECT:')) {
+                const url = text.replace('REDIRECT:', '').trim();
+                window.location.href = url;
+              }
+            }
+          });
+        });
+      });
+
+      const chat = chatWindow.shadowRoot.querySelector('.messages');
+      observer.observe(chat, { childList: true });
+    });
+  </script>
+
+</body>
+</html>
