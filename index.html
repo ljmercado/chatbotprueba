@@ -21,7 +21,7 @@
     const waitForChatReady = () => {
       const chatWindow = dfMessenger.shadowRoot?.querySelector('df-messenger-chat');
       const messagesContainer = chatWindow?.shadowRoot?.querySelector('.messages');
-
+ console.log(messagesContainer);
       if (messagesContainer) {
         const observer = new MutationObserver((mutations) => {
           mutations.forEach((mutation) => {
