@@ -30,7 +30,10 @@
         const chatShadow = chatElement.shadowRoot;
         if (!chatShadow) throw "⏳ Esperando shadowRoot interno...";
 
-        const messagesContainer = chatShadow.querySelector('#messageList'); // <== CORREGIDO
+        const messagesContainer = chatShadow.querySelector('#messageList') ||
+                          chatShadow.querySelector('.message-list') ||
+                          chatShadow.querySelector('.scrollable') ||
+                          chatShadow.querySelector('.chat-wrapper');
         if (!messagesContainer) throw "⏳ Esperando #messageList...";
 
         console.log("✅ Contenedor de mensajes encontrado:", messagesContainer);
