@@ -18,6 +18,8 @@
 
   <script>
   window.addEventListener('df-messenger-loaded', () => {
+    console.log("✅ df-messenger cargado");
+
     const dfMessenger = document.querySelector('df-messenger');
 
     const waitForChat = () => {
@@ -28,18 +30,21 @@
         const chatShadow = chatElement.shadowRoot;
         if (!chatShadow) throw "⏳ Esperando shadowRoot interno...";
 
-        const messagesContainer = chatShadow.querySelector('.message-list');
-        if (!messagesContainer) throw "⏳ Esperando .message-list...";
+        const messagesContainer = chatShadow.querySelector('#messageList'); // <== CORREGIDO
+        if (!messagesContainer) throw "⏳ Esperando #messageList...";
 
         console.log("✅ Contenedor de mensajes encontrado:", messagesContainer);
 
-        // 🔁 Revisión periódica de mensajes del bot
+        // 🔁 Revisión periódica
         setInterval(() => {
+          console.log("🔍 Buscando mensajes nuevos...");
           const messages = messagesContainer.querySelectorAll('div.message.bot-message');
           messages.forEach(msg => {
             const text = msg.innerText;
+            console.log("💬 Mensaje detectado:", text);
+
             if (text.startsWith('REDIRECT:') && !msg.dataset.redirected) {
-              msg.dataset.redirected = "true"; // para evitar redirecciones múltiples
+              msg.dataset.redirected = "true"; // Marcar como ya redirigido
               const url = text.replace('REDIRECT:', '').trim();
               console.log("➡️ Redirigiendo a:", url);
               window.location.href = url;
@@ -48,14 +53,13 @@
         }, 1000);
 
       } catch (e) {
-        console.log(e);
-        setTimeout(waitForChat, 300); // 🔁 Reintenta hasta que esté disponible
+        console.warn(e);
+        setTimeout(waitForChat, 500);
       }
     };
 
     waitForChat();
   });
 </script>
-
 </body>
 </html>
