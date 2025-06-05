@@ -19,27 +19,28 @@
   <script>
   window.addEventListener('df-messenger-loaded', () => {
     const dfMessenger = document.querySelector('df-messenger');
-    console.log("selector ", dfMessenger);
 
-    const waitForMessages = () => {
+    const waitForChat = () => {
       try {
         const chatElement = dfMessenger.shadowRoot.querySelector('df-messenger-chat');
-        if (!chatElement) throw "Esperando df-messenger-chat...";
+        if (!chatElement) throw "⏳ Esperando df-messenger-chat...";
 
         const chatShadow = chatElement.shadowRoot;
-        if (!chatShadow) throw "Esperando shadowRoot interno...";
+        if (!chatShadow) throw "⏳ Esperando shadowRoot interno...";
 
-        const messagesContainer = chatShadow.querySelector('.messages');
-        if (!messagesContainer) throw "Esperando div .messages...";
+        // 🔍 Buscamos un contenedor padre donde se agregan los mensajes individuales
+        const container = chatShadow.querySelector('.chat-wrapper') || chatShadow.querySelector('.scrollable');
+        if (!container) throw "⏳ Esperando contenedor de mensajes...";
 
-        console.log("✅ .messages encontrado:", messagesContainer);
+        console.log("✅ Contenedor de mensajes encontrado:", container);
 
+        // 🛰️ Observar nuevos mensajes del bot
         const observer = new MutationObserver((mutations) => {
           mutations.forEach((mutation) => {
             mutation.addedNodes.forEach((node) => {
               if (
                 node.nodeType === 1 &&
-                node.classList.contains('message') &&
+                node.matches('div.message.bot-message') &&
                 node.innerText.startsWith('REDIRECT:')
               ) {
                 const url = node.innerText.replace('REDIRECT:', '').trim();
@@ -50,15 +51,15 @@
           });
         });
 
-        observer.observe(messagesContainer, { childList: true });
+        observer.observe(container, { childList: true, subtree: true });
 
       } catch (e) {
-        console.log("⏳", e);
-        setTimeout(waitForMessages, 200); // vuelve a intentar
+        console.log(e);
+        setTimeout(waitForChat, 300); // 🔁 Reintenta hasta que todo esté listo
       }
     };
 
-    waitForMessages();
+    waitForChat();
   });
 </script>
 
