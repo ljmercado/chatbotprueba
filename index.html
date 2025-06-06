@@ -1,66 +1,85 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Chatbot con Redirección</title>
-  <script src="https://www.gstatic.com/dialogflow-console/fast/messenger/bootstrap.js?v=1"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ejemplos de Asistentes IA</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f9f9f9;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 1.5rem;
+      color: #333;
+    }
+    .container {
+      display: flex;
+      gap: 2rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      padding: 2rem;
+      text-align: center;
+      width: 250px;
+      transition: transform 0.3s ease;
+    }
+    .card:hover {
+      transform: scale(1.05);
+    }
+    .card h2 {
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+      color: #222;
+    }
+    .card p {
+      font-size: 0.9rem;
+      color: #666;
+      margin-bottom: 1.5rem;
+    }
+    .card a {
+      display: inline-block;
+      padding: 0.6rem 1.2rem;
+      background: #0078D7;
+      color: white;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: background 0.3s ease;
+    }
+    .card a:hover {
+      background: #005fa3;
+    }
+  </style>
 </head>
 <body>
-<h1>Bot creado con Dialogflow ES </h1>
-<p>Este chatbot está diseñado para responder preguntas sobre la historia de la computación y la inteligencia artificial. Puedes hacer preguntas como: Cuales son las condiciones de promoción de una materia, cual es la nota mínima para aprobar, que si determinada materia se puede rendir</p>
 
- <df-messenger
-  intent="WELCOME"
-  chat-title="Nina"
-  agent-id="820bd1d7-b43e-429d-a741-b1700de65e5a"
-  language-code="es"
-   chat-icon="https://cdn-icons-png.flaticon.com/512/4712/4712103.png"
-   opened="true"
-></df-messenger>
-<script>
-        const dfMessenger = document.querySelector('df-messenger');
-        const redirectPrefix = "REDIRECT:";
+  <h1>Explorá los Ejemplos de Asistentes IA</h1>
+  <div class="container">
+    
+    <div class="card">
+      <h2>Ejemplo con Dialogflow</h2>
+      <p>Interfaz de chatbot utilizando la plataforma Dialogflow de Google.</p>
+      <a href="pagina1.html">Ver ejemplo</a>
+    </div>
 
-        if (dfMessenger) {
-            // Escuchamos el evento cuando Dialogflow Messenger recibe una respuesta del agente
-            dfMessenger.addEventListener('df-response-received', function (event) {
-                // event.detail.response contiene la respuesta completa de Dialogflow
-                const response = event.detail.response;
-                
-                // En Dialogflow ES, el texto está en queryResult.fulfillmentText
-                // En Dialogflow CX, puede estar en queryResult.responseMessages[].text.text[]
-                let fulfillmentText = '';
+    <div class="card">
+      <h2>Asistente con Gemini</h2>
+      <p>Integración con Gemini para crear experiencias conversacionales potentes.</p>
+      <a href="pagina2.html">Ver ejemplo</a>
+    </div>
 
-                if (response && response.queryResult && response.queryResult.fulfillmentText) {
-                    // Dialogflow ES
-                    fulfillmentText = response.queryResult.fulfillmentText;
-                } else if (response && response.queryResult && response.queryResult.responseMessages) {
-                    // Dialogflow CX - buscar en los mensajes de texto
-                    for (const message of response.queryResult.responseMessages) {
-                        if (message.text && message.text.text && message.text.text.length > 0) {
-                            fulfillmentText = message.text.text[0]; // Tomamos el primer mensaje de texto
-                            break; // Salimos del bucle una vez que encontramos un texto
-                        }
-                    }
-                }
+  </div>
 
-                // Verificar si el texto comienza con "REDIRECT:"
-                if (fulfillmentText.startsWith(redirectPrefix)) {
-                    const url = fulfillmentText.substring(redirectPrefix.length).trim();
-                    console.log(`Mensaje de redirección detectado: ${url}`);
-
-                    // Asegúrate de que la URL sea válida antes de redirigir
-                    try {
-                        const validatedUrl = new URL(url); // Esto valida si es una URL bien formada
-                        console.log(`Redirigiendo a: ${validatedUrl.href}`);
-                        window.location.href = validatedUrl.href; // Realiza la redirección
-                    } catch (e) {
-                        console.error(`URL inválida para redirección: ${url}`, e);
-                        // Opcional: Podrías mostrar un mensaje de error al usuario en el chatbot
-                    }
-                }
-            });
-        }
-    </script>
 </body>
 </html>
