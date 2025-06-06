@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Chatbot con Redirección</title>
+  <script src="https://www.gstatic.com/dialogflow-console/fast/messenger/bootstrap.js?v=1"></script>
+</head>
+<body>
+<h1>Bot creado con Dialogflow ES </h1>
+<p>Este chatbot está diseñado para responder preguntas sobre la historia de la computación y la inteligencia artificial. Puedes hacer preguntas como: Cuales son las condiciones de promoción de una materia, cual es la nota mínima para aprobar, que si determinada materia se puede rendir</p>
+
+ <df-messenger
+  intent="WELCOME"
+  chat-title="Nina"
+  agent-id="820bd1d7-b43e-429d-a741-b1700de65e5a"
+  language-code="es"
+   chat-icon="https://cdn-icons-png.flaticon.com/512/4712/4712103.png"
+   opened="true"
+></df-messenger>
+<script>
+        const dfMessenger = document.querySelector('df-messenger');
+        const redirectPrefix = "REDIRECT:";
+
+        if (dfMessenger) {
+            // Escuchamos el evento cuando Dialogflow Messenger recibe una respuesta del agente
+            dfMessenger.addEventListener('df-response-received', function (event) {
+                // event.detail.response contiene la respuesta completa de Dialogflow
+                const response = event.detail.response;
+                
+                // En Dialogflow ES, el texto está en queryResult.fulfillmentText
+                // En Dialogflow CX, puede estar en queryResult.responseMessages[].text.text[]
+                let fulfillmentText = '';
+
+                if (response && response.queryResult && response.queryResult.fulfillmentText) {
+                    // Dialogflow ES
+                    fulfillmentText = response.queryResult.fulfillmentText;
+                } else if (response && response.queryResult && response.queryResult.responseMessages) {
+                    // Dialogflow CX - buscar en los mensajes de texto
+                    for (const message of response.queryResult.responseMessages) {
+                        if (message.text && message.text.text && message.text.text.length > 0) {
+                            fulfillmentText = message.text.text[0]; // Tomamos el primer mensaje de texto
+                            break; // Salimos del bucle una vez que encontramos un texto
+                        }
+                    }
+                }
+
+                // Verificar si el texto comienza con "REDIRECT:"
+                if (fulfillmentText.startsWith(redirectPrefix)) {
+                    const url = fulfillmentText.substring(redirectPrefix.length).trim();
+                    console.log(`Mensaje de redirección detectado: ${url}`);
+
+                    // Asegúrate de que la URL sea válida antes de redirigir
+                    try {
+                        const validatedUrl = new URL(url); // Esto valida si es una URL bien formada
+                        console.log(`Redirigiendo a: ${validatedUrl.href}`);
+                        window.location.href = validatedUrl.href; // Realiza la redirección
+                    } catch (e) {
+                        console.error(`URL inválida para redirección: ${url}`, e);
+                        // Opcional: Podrías mostrar un mensaje de error al usuario en el chatbot
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
